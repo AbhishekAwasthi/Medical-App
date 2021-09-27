@@ -1,0 +1,11 @@
+<aura:component
+                controller="GoogleAuthService"
+                implements="lightning:isUrlAddressable,force:appHostable"
+                access="global"
+                >
+
+    <lightning:card title="Salesforce Calender Authorization">
+        <p>Authorization Successfull</p>
+
+    </lightning:card>
+</aura:component>

@@ -59,6 +59,7 @@
     
     <aura:if isTrue="{!v.showEditModel}">
         <!-- Modal/Popup Box starts here-->
+        
         <section
                  role="dialog"
                  tabindex="-1"
@@ -147,8 +148,8 @@
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
     </aura:if>
-    
-    <article class="slds-card tableCard">
+
+ <article class="slds-card tableCard">
         <div class="slds-page-header">
             <div class="slds-grid">
                 <div class="slds-col slds-has-flexi-truncate">

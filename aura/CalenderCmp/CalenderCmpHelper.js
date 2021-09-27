@@ -81,12 +81,11 @@
                 var thetoday = date1.getDate();
                 console.log("dayclised" + theyear, themonth, thetoday);
                 //var datelist = date1.format().toString().split('-');
-                let datestring =
-                    theyear + "-" + themonth + "-" + thetoday + "T09:00:00.000Z";
+               // let datestring = theyear + "-" + themonth + "-" + thetoday + "T09:00:00.000Z";
                 let spec = component.find("selectSpecialization").get("v.value");
                 let myArr = spec.split("-");
                 component.set("v.showEditModel", true);
-                let datelocal = moment(date1, "DDMMYYYY").add("15", "minutes");
+                let datelocal = moment(date1, "DDMMYYYY");
                 let startDateTime = datelocal.toISOString();
                 component.set("v.startDate", startDateTime);
                 
@@ -134,6 +133,7 @@
         this.showSpinner(component);
         
         let userIdVar = component.find("selectPhysician").get("v.value");
+        console.log('user selected'+userIdVar);
         let action = component.get("c.getAllEvents");
         action.setParams({
             userId: userIdVar
@@ -157,6 +157,7 @@
                     type: "error"
                 });
                 this.loadDataToCalendar(component, "");
+                component.set("v.eventList", "");
                 this.hideSpinner(component);
                 toastEvent.fire();
             }
