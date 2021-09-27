@@ -1,0 +1,22 @@
+<aura:component
+                controller="GoogleAuthService"
+                implements="lightning:isUrlAddressable,force:appHostable"
+                access="global"
+                >
+    <aura:handler
+                  name="init"
+                  value="{!this}"
+                  action="{!c.doInit}"
+                  description="Handler for valueInit event fired when the component has been initialised"
+                  />
+
+    <lightning:card title="Salesforce Calender Authorization">
+        <lightning:button
+                          variant="brand"
+                          label="Authorize Calender"
+                          title="Authorize Calender"
+                          onclick="{! c.doAuth }"
+                          />
+
+    </lightning:card>
+</aura:component>

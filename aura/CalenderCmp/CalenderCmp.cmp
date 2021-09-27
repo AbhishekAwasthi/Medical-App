@@ -1,0 +1,248 @@
+<aura:component
+                controller="CalenderClass"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction"
+                access="global"
+                >
+    <ltng:require
+                  styles="{!$Resource.FullCalendarJS     + '/fullcalendar.min.css'}"
+                  scripts="{!join(',',
+                           $Resource.FullCalendarJS  + '/jquery.min.js',
+                           $Resource.FullCalendarJS  + '/moment.min.js',
+                           $Resource.FullCalendarJS  + '/fullcalendar.min.js'
+                           )}"
+                  afterScriptsLoaded="{!c.afterScriptsLoaded}"
+                  />
+    
+    <!--  <ltng:require styles="/resource/FullCalendarJS/fullcalendar.min.css"/>
+  <aura:handler name="init" value="{!this}" action="{!c.fetchEvents}"/>
+-->
+    
+    <aura:attribute type="event[]" name="eventList" />
+    
+    <aura:attribute name="mycolumns" type="List" />
+    <aura:attribute name="specializationOptions" type="Specialization__c[]" />
+    <aura:attribute
+                    name="selectedSpecialization"
+                    type="Specialization__c"
+                    default=""
+                    />
+    <aura:attribute name="showCalender" type="Boolean" default="true" />
+    
+    <aura:attribute name="showEditModel" type="Boolean" default="false" />
+    
+    <aura:attribute name="physicianOptions" type="user[]" />
+    <aura:attribute name="selectedPhysician" type="user" default="true" />
+    
+    <aura:attribute name="selectedPrice" type="string" default="" />
+    <aura:attribute name="subject" type="string" default="" />
+    <aura:attribute name="patientName" type="string" default="" />
+    <aura:attribute name="patientEmail" type="string" default="" />
+    <aura:attribute name="startDate" type="string" />
+    <aura:attribute name="endDate" type="string" default="" />
+    
+    <aura:attribute
+                    name="Spinner"
+                    type="Boolean"
+                    default="false"
+                    access="global"
+                    />
+    
+    <aura:if isTrue="{!v.Spinner}">
+        <div class="slds-spinner_container">
+            <lightning:spinner
+                               variant="brand"
+                               size="medium"
+                               alternativeText="Please wait while we get the details"
+                               />
+        </div>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.showEditModel}">
+        <!-- Modal/Popup Box starts here-->
+        <section
+                 role="dialog"
+                 tabindex="-1"
+                 aria-labelledby="modal-heading-01"
+                 aria-modal="true"
+                 aria-describedby="modal-content-id-1"
+                 class="slds-modal slds-fade-in-open"
+                 >
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button
+                            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            title="Close"
+                            onclick="{!c.handleCloseModel}"
+                            >
+                        <lightning:icon
+                                        iconName="utility:close"
+                                        alternativeText="close"
+                                        title="close"
+                                        variant="inverse"
+                                        size="small"
+                                        />
+                    </button>
+                    <h2
+                        id="modal-heading-01"
+                        class="slds-text-heading_medium slds-hyphenate"
+                        >
+                        Create event
+                    </h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                
+                <div
+                     class="slds-modal__content slds-p-around_medium"
+                     id="modal-content-id-1"
+                     >
+                    <lightning:input
+                                     aura:id="subject"
+                                     type="text"
+                                     label="Subject"
+                                     name="Subject"
+                                     value="{!v.subject}"
+                                     />
+                    <lightning:input
+                                     aura:id="patientName"
+                                     type="text"
+                                     label="Patient Name"
+                                     name="Subject"
+                                     value="{!v.patientName}"
+                                     />
+                    <lightning:input
+                                     aura:id="patientEmail"
+                                     type="text"
+                                     label="Patient Email"
+                                     name="Subject"
+                                     value="{!v.patientEmail}"
+                                     />
+                    <lightning:input
+                                     aura:id="startDate"
+                                     type="datetime"
+                                     label="Start Date"
+                                     name="datetime"
+                                     value="{!v.startDate}"
+                                     />
+                    <lightning:input
+                                     aura:id="EndDate"
+                                     type="datetime"
+                                     label="End Date"
+                                     name="datetime"
+                                     value="{!v.endDate}"
+                                     />
+                </div>
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <lightning:button label="Cancel" onclick="{!c.handleCloseModel}" />
+                    <lightning:button
+                                      variant="brand"
+                                      type="submit"
+                                      name="save"
+                                      label="Save"
+                                      onclick="{!c.handleCreateRecord}"
+                                      />
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </aura:if>
+    
+    <article class="slds-card tableCard">
+        <div class="slds-page-header">
+            <div class="slds-grid">
+                <div class="slds-col slds-has-flexi-truncate">
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon
+                                            iconName="standard:performance"
+                                            alternativeText="{!v.dataTableHead}"
+                                            size="small"
+                                            />
+                        </div>
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title"
+                                ><span class="slds-text-heading_small slds-truncate"
+                                       >Appointments</span
+                                ></h2
+                                >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slds-card__body">
+            <lightning:layout horizontalAlign="spread">
+                <lightning:layoutItem size="3" padding="around-small">
+                    <div class="header-column">
+                        <lightning:select
+                                          name="selectSpecialization"
+                                          aura:id="selectSpecialization"
+                                          value="{!v.selectedSpecialization}"
+                                          label="Select Specialization"
+                                          required="true"
+                                          onchange="{!c.handleSelectOnchange}"
+                                          >
+                            <option value="--None--" text="--None--"></option>
+                            <aura:iteration items="{!v.specializationOptions}" var="option">
+                                <option
+                                        value="{!option.Name + '-'+ option.Appointment_Price__c}"
+                                        text="{!option.Name}"
+                                        ></option>
+                            </aura:iteration>
+                        </lightning:select>
+                    </div>
+                </lightning:layoutItem>
+                <lightning:layoutItem size="3" padding="around-small">
+                    <div class="header-column">
+                        <lightning:select
+                                          name="selectPhysician"
+                                          aura:id="selectPhysician"
+                                          value="{!v.selectedPhysician}"
+                                          label="Select Physician"
+                                          required="true"
+                                          onchange="{!c.handleSelectPhysicianOnchange}"
+                                          >
+                            <option value="--None--" text="--None--"></option>
+                            <aura:iteration items="{!v.physicianOptions}" var="option">
+                                <option value="{!option.Id}" text="{!option.Name}"></option>
+                            </aura:iteration>
+                        </lightning:select>
+                    </div>
+                </lightning:layoutItem>
+                <lightning:layoutItem size="3" padding="around-small">
+                    <div class="header-column">
+                        <div class="slds-text-body_regular"
+                             >The Appointment Price of seleceted Specialization is
+                            €{!v.selectedPrice}.</div
+                            >
+                    </div>
+                </lightning:layoutItem>
+                <lightning:layoutItem size="3" padding="around-small">
+                    <div class="header-column"> </div>
+                </lightning:layoutItem>
+            </lightning:layout>
+            
+            <aura:if isTrue="{!v.showCalender}">
+                <lightning:layout horizontalAlign="spread">
+                    <lightning:layoutItem size="6" padding="around-small">
+                        <div
+                             id="calendar"
+                             class="slds-card"
+                             style="height:100%; width:100%;"
+                             >
+                        </div>
+                    </lightning:layoutItem>
+                    <lightning:layoutItem size="6" padding="around-small">
+                        <lightning:datatable
+                                             data="{! v.eventList }"
+                                             columns="{! v.mycolumns }"
+                                             keyField="id"
+                                             hideCheckboxColumn="true"
+                                             />
+                    </lightning:layoutItem>
+                </lightning:layout>
+            </aura:if>
+        </div>
+    </article>
+</aura:component>
