@@ -6,7 +6,7 @@ public class CalenderClass {
        string result =  GoogleCalendarActionsController.getAllEventsForUser(userId);
         
         if(result=='success'){
-            list<Event> eventlist =[Select id, EndDateTime,StartDateTime,Subject,Sync_Status__c from Event where createdById=:userId] ;
+            list<Event> eventlist =[Select id, EndDateTime,StartDateTime,Subject,Sync_Status__c from Event where ownerid=:userId] ;
              return eventlist;
         }
         else
@@ -38,7 +38,7 @@ public class CalenderClass {
         string result =  GoogleCalendarActionsController.createEventInGoogle(eventObject,objUser.Gmail__c);
         
         if(result=='success'){
-            list<Event> eventlist =[Select id, EndDateTime,StartDateTime,Subject,Sync_Status__c from Event where createdById=:ownerid] ;
+            list<Event> eventlist =[Select id, EndDateTime,StartDateTime,Subject,Sync_Status__c from Event where ownerid=:ownerid] ;
              return eventlist;
         }
         else

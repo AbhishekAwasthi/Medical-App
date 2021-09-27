@@ -1,9 +1,10 @@
 public class GoogleCalendarActionsController {
     
-    //API Secret Key // these needs to be pt on a custom lable 
-    private static string key = '316443490222-em25ldmu0bgpv2eauhc8iu6dngamvr1q.apps.googleusercontent.com';
+    
+        //API Secret Key
+    private static string key = System.Label.Google_Key; // '316443490222-em25ldmu0bgpv2eauhc8iu6dngamvr1q.apps.googleusercontent.com';
     //API Secret
-    private Static string secert = 'YuEq2YTC_oIJFMNftt8A37Fi';
+    private Static string secert =  System.Label.Google_Secret; // 'YuEq2YTC_oIJFMNftt8A37Fi';
     
     
     
@@ -22,7 +23,7 @@ public class GoogleCalendarActionsController {
                 accessToken = Info[0].Access_Token__c;
                 
             }
-            String endPoint = 'https://www.googleapis.com/calendar/v3/calendars/abhishawasthi@gmail.com/events?timeZone=GMT&timeMin='+myDtString;
+            String endPoint = 'https://www.googleapis.com/calendar/v3/calendars/'+Info[0].email__c+'/events?timeZone=GMT&timeMin='+myDtString;
             
             
             
@@ -46,9 +47,15 @@ public class GoogleCalendarActionsController {
                 
                 database.upsert(Info[0], Google_Access_Information__c.email__c);
                 updateEventsInSalesforce(respObj,UserId);
-                
+                 return 'success';
             }
-            return 'success';
+            else if(HttpRes.getStatusCode() == 401){ 
+                return 'User not authorized Please ask user to authorize his calender via authorization screen';
+            }
+            else{
+                return 'Something Went Wrong Please reach out to your administrator';
+            }
+           
         }
         else{
             return 'User not authorized Please ask user to authorize his calender via authorization screen';
@@ -165,14 +172,23 @@ public class GoogleCalendarActionsController {
             System.debug('#### HtteRes '+HttpRes.getBody());
             /*Integration_Information__c obj = logInfo(requestBody,HttpRes.getBody(),reqstartTime,requestEndTime,eventObj.id,eventObj.OwnerId);
             insert obj; */
-            Map<String,object> IdInfo = (Map<String,object>)JSON.deserializeUntyped(HttpRes.getBody());
+             if(HttpRes.getStatusCode() == 200) {
+                 Map<String,object> IdInfo = (Map<String,object>)JSON.deserializeUntyped(HttpRes.getBody());
             
-            if(IdInfo != null){
-                eventObj.GoogleEventId__c=  String.valueOf(IdInfo.get('id')); 
-                insert eventObj;
+                if(IdInfo != null){
+                    eventObj.GoogleEventId__c=  String.valueOf(IdInfo.get('id')); 
+                    insert eventObj;
+                }
+                database.upsert(Info[0], Google_Access_Information__c.email__c);
+                return 'Success';
+             }
+            else if(HttpRes.getStatusCode() == 401){ 
+                return 'User not authorized Please ask user to authorize his calender via authorization screen';
             }
-            database.upsert(Info[0], Google_Access_Information__c.email__c);
-            return 'Success';
+            else{
+                return 'Something Went Wrong Please reach out to your administrator';
+            }
+            
         }
         else{
             return 'User not authorized Please ask user to authorize his calender via authorization screen';

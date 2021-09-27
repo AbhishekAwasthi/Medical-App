@@ -1,8 +1,8 @@
 public class GoogleAuthService {
-    //API Secret Key
-    private static string key = '316443490222-em25ldmu0bgpv2eauhc8iu6dngamvr1q.apps.googleusercontent.com';
+        //API Secret Key
+    private static string key = System.Label.Google_Key; // '316443490222-em25ldmu0bgpv2eauhc8iu6dngamvr1q.apps.googleusercontent.com';
     //API Secret
-    private Static string secert = 'YuEq2YTC_oIJFMNftt8A37Fi';
+    private Static string secert =  System.Label.Google_Secret; // 'YuEq2YTC_oIJFMNftt8A37Fi';
     //API Redirect. Use your Lightning Tab or Lightning community URL
     private Static string redirect_uri = 'https://takeaway-dev-ed--c.visualforce.com/apex/GoogleCalenderoAuth';
     private static string authUrl='https://accounts.google.com/o/oauth2/v2/auth';
@@ -29,6 +29,12 @@ public class GoogleAuthService {
     {
         String code = System.currentPageReference().getParameters().get('code');
         system.debug('code:'+ code);
+        if(string.isBlank(code)){
+          PageReference retURL = new PageReference('https://takeaway-dev-ed.lightning.force.com/lightning/n/Authorization_Error');
+            retURL.setRedirect(true);
+            return retURL;
+        
+        }
         //Getting access token from google
         HttpRequest req = new HttpRequest();
         req.setMethod('POST');
@@ -60,11 +66,20 @@ public class GoogleAuthService {
         
         system.debug('token:'+token);
         
+        user objuser = [select id,gmail__c from user where id =: userinfo.getUserId()];
+        
+         if(string.isBlank(objuser.gmail__c)){
+          PageReference retURL = new PageReference('https://takeaway-dev-ed.lightning.force.com/lightning/n/Authorization_Error');
+            retURL.setRedirect(true);
+            return retURL;
+        
+        }
+        
         Google_Access_Information__c obj = new Google_Access_Information__c(
             Access_Token__c = token,
             RefreshToken__c = refreshToken,
             User__c = userinfo.getUserId(),
-            email__c = userinfo.getUserEmail(),
+            email__c = objuser.gmail__c,
             Expires_In__c  = numberOfSeconds,
             Next_Expiry_DateTime__c = dt
         );
@@ -72,7 +87,7 @@ public class GoogleAuthService {
         
         database.upsert(obj, Google_Access_Information__c.email__c);
         
-        PageReference retURL = new PageReference('https://takeaway-dev-ed.lightning.force.com/lightning/n/Authorize_Calendar');
+        PageReference retURL = new PageReference('https://takeaway-dev-ed.lightning.force.com/lightning/n/Authorize_Success');
         retURL.setRedirect(true);
         return retURL;
         
