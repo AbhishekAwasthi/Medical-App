@@ -202,6 +202,7 @@
     
     fetchUser: function(component, event, helper) {
         this.showSpinner(component);
+       
         let spec = component.find("selectSpecialization").get("v.value");
         
         let myArr = spec.split("-");
@@ -216,7 +217,8 @@
             if (state === "SUCCESS") {
                 let storeResponse = response.getReturnValue();
                 component.set("v.physicianOptions", storeResponse);
-                
+                 this.loadDataToCalendar(component, "");
+                 component.set("v.eventList", "");
                 this.hideSpinner(component);
             } else {
                 this.hideSpinner(component);

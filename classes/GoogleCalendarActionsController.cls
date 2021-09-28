@@ -20,7 +20,11 @@ public class GoogleCalendarActionsController {
             datetime dt = Info[0].Next_Expiry_DateTime__c; 
             if(dt< datetime.now()){
                 Info[0] =  GoogleAuthAccessToken.getNewAccessToken(UserId);
+                if(Info[0].Access_Token__c=='Error'){
+                    return Info[0].RefreshToken__c;
+                }
                 accessToken = Info[0].Access_Token__c;
+                
                 
             }
             String endPoint = 'https://www.googleapis.com/calendar/v3/calendars/'+Info[0].email__c+'/events?timeZone=GMT&timeMin='+myDtString;
