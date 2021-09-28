@@ -1,0 +1,6 @@
+HI {!Event.Patient_Full_Name__c}
+
+Your Appointment with {!Event.Owner} has been confirmed from {!Event.StartDateTime} to {!Event.EndDateTime}
+
+Regards
+Medical Clinic Team
